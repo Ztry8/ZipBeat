@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor — ZipBeat</title>
+  <meta name="description" content="ZipBeat grid sequencer editor. Place oscillator blocks, tune frequencies, and export your beat.">
+  <meta name="robots" content="noindex">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --card: #1a1a27;
+      --border: #2a2a3e;
+      --border-light: #33334a;
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --accent: #a78bfa;
+      --accent-glow: rgba(124, 58, 237, 0.4);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted-light: #94a3b8;
+      --cell-empty: #16162280;
+      --cell-hover: rgba(124, 58, 237, 0.2);
+      --cell-active: #7c3aed;
+      --cell-active-glow: rgba(124,58,237,0.5);
+      --playhead: #f59e0b;
+      --row-h: 40px;
+      --col-w: 36px;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+      padding: 0 12px;
+      overflow-x: auto;
+    }
+
+    .topbar-logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      padding: 0 12px;
+      white-space: nowrap;
+    }
+
+    .topbar-logo span { color: var(--accent); }
+
+    .topbar-sep {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+
+    .tb-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .tb-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .tb-select, .tb-input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.83rem;
+      border-radius: 6px;
+      padding: 5px 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .tb-select:focus, .tb-input:focus { border-color: var(--primary); }
+    .tb-input { width: 80px; }
+    .tb-input-sm { width: 64px; }
+
+    .tb-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted-light);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tb-btn:hover { color: var(--text); border-color: var(--border-light); background: var(--border); }
+
+    .tb-btn.active, .tb-btn-play {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .tb-btn-play:hover { background: var(--primary-hover); }
+
+    .tb-btn-danger { color: #f87171; border-color: #3f2020; }
+    .tb-btn-danger:hover { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: #f87171; }
+
+    .tb-btn-export { color: var(--accent); border-color: rgba(124,58,237,0.4); }
+    .tb-btn-export:hover { background: rgba(124,58,237,0.12); }
+
+    .editor-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    .grid-wrap {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      cursor: crosshair;
+    }
+
+    .grid-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+    .grid-wrap::-webkit-scrollbar-track { background: var(--bg); }
+    .grid-wrap::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+    .grid-wrap::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    #gridCanvas {
+      display: block;
+      position: absolute;
+      top: 0; left: 0;
+    }
+
+    .statusbar {
+      height: 28px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+
+    .statusbar span {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .statusbar strong {
+      color: var(--muted-light);
+      font-weight: 500;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 420px;
+      max-width: 90vw;
+    }
+
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .modal-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .modal-row label { font-size: 0.88rem; color: var(--muted-light); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .modal-btn {
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted-light);
+      transition: all 0.15s;
+    }
+
+    .modal-btn:hover { color: var(--text); }
+
+    .modal-btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .modal-btn-primary:hover { background: var(--primary-hover); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar" role="toolbar" aria-label="Editor controls">
+
+  <a href="index.html" class="topbar-logo" aria-label="ZipBeat home">Zip<span>Beat</span></a>
+  <div class="topbar-sep" aria-hidden="true"></div>
+
+  <div class="tb-group" role="group" aria-label="Transport">
+    <button class="tb-btn tb-btn-play" id="btnPlay" title="Play (Space)">
+      <i id="playIcon" class="fa-solid fa-play"></i>
+      <span id="playLabel">Play</span>
+    </button>
+    <button class="tb-btn" id="btnStop" title="Stop">
+      <i class="fa-solid fa-stop"></i>
+      Stop
+    </button>
+    <button class="tb-btn" id="btnRewind" title="Return to start">
+      <i class="fa-solid fa-backward-step"></i>
+      Start
+    </button>
+  </div>
+
+  <div class="topbar-sep" aria-hidden="true"></div>
+
+  <div class="tb-group" role="group" aria-label="Sound settings">
+    <span class="tb-label">Type</span>
+    <select class="tb-select" id="selType" aria-label="Oscillator type">
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="sawtooth">Sawtooth</option>
+      <option value="triangle">Triangle</option>
+    </select>
+    <span class="tb-label">Freq</span>
+    <input class="tb-input tb-input-sm" id="inpFreq" type="number" min="20" max="20000" value="440" aria-label="Frequency in Hz">
+    <span class="tb-label">Hz</span>
+    <span class="tb-label" style="margin-left:8px">Detune</span>
+    <input class="tb-input tb-input-sm" id="inpDetune" type="number" min="-1200" max="1200" value="0" aria-label="Detune in cents">
+    <span class="tb-label">c</span>
+  </div>
+
+  <div class="topbar-sep" aria-hidden="true"></div>
+
+  <div class="tb-group" role="group" aria-label="Project">
+    <button class="tb-btn" id="btnSave">
+      <i class="fa-solid fa-floppy-disk"></i>
+      Save
+    </button>
+    <button class="tb-btn" id="btnLoad">
+      <i class="fa-solid fa-folder-open"></i>
+      Load
+    </button>
+    <input type="file" id="fileInput" accept=".json" style="display:none" aria-hidden="true">
+  </div>
+
+  <div class="topbar-sep" aria-hidden="true"></div>
+
+  <div class="tb-group" role="group" aria-label="Export">
+    <button class="tb-btn tb-btn-export" id="btnExport">
+      <i class="fa-solid fa-file-audio"></i>
+      Export Audio
+    </button>
+  </div>
+
+  <div class="topbar-sep" aria-hidden="true"></div>
+
+  <div class="tb-group">
+    <button class="tb-btn tb-btn-danger" id="btnClear">
+      <i class="fa-solid fa-trash"></i>
+      Clear
+    </button>
+  </div>
+
+</div>
+
+<div class="editor-body">
+  <div class="grid-wrap" id="gridWrap">
+    <canvas id="gridCanvas" aria-label="Beat sequencer grid"></canvas>
+  </div>
+</div>
+
+<div class="statusbar" role="status" aria-live="polite">
+  <span>Blocks: <strong id="statBlocks">0</strong></span>
+  <span>Playhead: col <strong id="statCol">0</strong></span>
+  <span id="statStatus">Stopped</span>
+</div>
+
+<div class="modal-overlay" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+  <div class="modal">
+    <h2 id="exportTitle">Export Audio</h2>
+    <div class="modal-row">
+      <label for="expFormat">Format</label>
+      <select class="tb-select" id="expFormat">
+        <option value="audio/ogg;codecs=opus">OGG / Opus</option>
+        <option value="audio/webm;codecs=opus">WebM / Opus</option>
+        <option value="audio/webm">WebM</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <label for="expBitrate">Bitrate</label>
+      <select class="tb-select" id="expBitrate">
+        <option value="64000">64 kbps</option>
+        <option value="96000">96 kbps</option>
+        <option value="128000" selected>128 kbps</option>
+        <option value="192000">192 kbps</option>
+        <option value="256000">256 kbps</option>
+        <option value="320000">320 kbps</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <label for="expGap">Block duration</label>
+      <select class="tb-select" id="expGap">
+        <option value="50">50 ms</option>
+        <option value="75">75 ms</option>
+        <option value="100">100 ms</option>
+        <option value="150">150 ms</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="expCancel">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="expGo">Render & Download</button>
+    </div>
+  </div>
+</div>
+<script src="editor.js"></script>
+</body>
+</html>
