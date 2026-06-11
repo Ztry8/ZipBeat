@@ -2,7 +2,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/ztry8/zipbeat)
 ![License](https://img.shields.io/github/license/ztry8/zipbeat)
 
-Browser-based grid sequencer and audio generator built on the Web Audio API
+## Browser-based grid sequencer and audio generator built on the Web Audio API
 
 ## About
 
