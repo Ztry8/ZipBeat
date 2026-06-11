@@ -6,14 +6,14 @@ Browser-based grid sequencer and audio generator built on the Web Audio API
 
 ## About
 
-ZipBeat is a static, dependency-free beat sequencer that runs entirely in the browser.
+ZipBeat is a static, dependency-free beat sequencer that runs entirely in the browser.    
 No server, no install, no account required.
 
-The sequencer uses a 10-row by 1000-column grid where each cell represents a 50ms oscillator tone.
-Sounds placed in the same column play simultaneously, allowing chords and layered textures.
+The sequencer uses a 10-row by 1000-column grid where each cell represents a 50ms oscillator tone.     
+Sounds placed in the same column play simultaneously, allowing chords and layered textures.      
 The playhead moves left to right and can be dragged to any position with the mouse.
 
-Projects are saved and loaded as JSON files.
+Projects are saved and loaded as JSON files.      
 Audio can be exported to OGG or WebM using the MediaRecorder API.
 
 ## Oscillator types
@@ -51,7 +51,7 @@ The export modal allows configuring the output before rendering:
 | Bitrate | 64, 96, 128, 192, 256, 320 kbps |
 | Block duration | 50, 75, 100, 150 ms |
 
-Export is performed entirely in the browser using the Web Audio API and MediaRecorder.
+Export is performed entirely in the browser using the Web Audio API and MediaRecorder.     
 No data is sent to any server.
 
 ## Project file format
@@ -72,12 +72,12 @@ Each key in `cells` is `"row,column"` (zero-indexed).
 
 ## Browser support
 
-Requires a modern browser with Web Audio API and MediaRecorder support.
+Requires a modern browser with Web Audio API and MediaRecorder support.     
 Tested on Chrome 120+, Firefox 121+, and Safari 17+.
 
 ## AI music prompt
 
-The following prompt can be used with any AI chatbot to generate
+The following prompt can be used with any AI chatbot to generate      
 musical ideas, patterns, or compositions suited for ZipBeat.
 
 ---
@@ -112,7 +112,7 @@ Return only the JSON object, no explanation, no markdown code fences.
 
 ## Building and hosting
 
-ZipBeat is pure static HTML. No build step is required.
+ZipBeat is pure static HTML. No build step is required.       
 To host it, place the files on any static file server or open `index.html` directly in a browser.
 
 ```
