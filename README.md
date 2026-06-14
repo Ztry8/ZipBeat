@@ -25,7 +25,7 @@ Audio can be exported to OGG or WebM using the MediaRecorder API.
 | Sawtooth | Sharp, synthesizer-like |
 | Triangle | Softer than square |
 
-Each block on the grid stores its own type, frequency (Hz), and detune (cents) independently.
+Each block on the grid stores its own type, note, frequency (Hz), and volume independently.
 
 ## Controls
 
@@ -40,6 +40,9 @@ Each block on the grid stores its own type, frequency (Hz), and detune (cents) i
 | Load project | Load button, opens file picker |
 | Export audio | Export Audio button, opens settings modal |
 | Clear grid | Clear button |
+| Draw blocks | Left click and drag |
+| Erase blocks | Right click or right click and drag |
+| Toggle loop | Loop button |
 
 ## Export options
 
@@ -62,8 +65,8 @@ Projects are saved as `.json` files with the following structure:
 {
   "version": 1,
   "cells": {
-    "0,4": { "type": "sine", "freq": 440, "detune": 0 },
-    "2,4": { "type": "square", "freq": 220, "detune": -10 }
+    "0,4": { "type": "sine", "freq": 440, "note": "A4", "vol": 0.18 },
+    "2,4": { "type": "square", "freq": 261.63, "note": "C4", "vol": 0.18 }
   }
 }
 ```
@@ -85,27 +88,34 @@ musical ideas, patterns, or compositions suited for ZipBeat.
 **Prompt:**
 
 ```
-You are a music composer assistant for ZipBeat, a browser-based grid sequencer.
-ZipBeat uses a 10-row by 1000-column grid. Each cell plays a 50ms oscillator tone.
-Sounds placed in the same column play simultaneously (polyphony).
-The playhead moves left to right, column by column.
+You are a music composer for ZipBeat, a browser-based chiptune sequencer.
 
-Available oscillator types: sine, square, sawtooth, triangle.
-Each block has a frequency in Hz and a detune value in cents.
+Grid: 10 rows, 1000 columns. Each column plays simultaneously — that's one moment in time.
+Playhead moves left to right. Each cell is a 50ms oscillator tone.
 
-Generate a musical pattern as a JSON object compatible with the ZipBeat project format.
-The root object must have a "version" key equal to 1 and a "cells" key.
-Each entry in "cells" uses the key format "row,column" where row is 0 to 9
-and column is any non-negative integer.
-Each value must have "type" (one of sine, square, sawtooth, triangle),
-"freq" (number in Hz, e.g. 261.63 for middle C), and "detune" (integer in cents, typically 0).
+Output format — JSON object:
+{
+  "version": 1,
+  "cells": {
+    "row,col": { "type": "...", "freq": 0.0, "note": "...", "vol": 0.18 }
+  }
+}
 
-Use standard note frequencies. For reference:
-C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23,
-G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25.
+Rules:
+- row: 0–9 (use different rows for different instruments/voices)
+- col: 0+ (time position)
+- type: sine | square | sawtooth | triangle
+- freq: Hz (C4=261.63, D4=293.66, E4=329.63, F4=349.23, G4=392.00, A4=440.00, B4=493.88, C5=523.25)
+- note: human-readable label matching freq (e.g. "A4")
+- vol: 0.0–1.0 (use lower vol for background layers, e.g. 0.08–0.12)
 
-Generate a short melody or rhythmic pattern of your choice.
-Return only the JSON object, no explanation, no markdown code fences.
+Suggestions:
+- Use square/triangle for melody, sine for bass, sawtooth for pads
+- Layer voices across rows for richer texture
+- Repeat patterns every 16–32 cols for a loop-friendly result
+- Keep col range tight (0–63 max) for a short loop
+
+Return only the JSON. No explanation, no markdown fences.
 ```
 
 ---
