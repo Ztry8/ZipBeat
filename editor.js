@@ -3,7 +3,7 @@
   const COLS = 1000;
   const COL_W = 36;
   const ROW_H = 40;
-  const BLOCK_MS = 50;
+  let BLOCK_MS = 50;
 
   const COLOR_BG      = '#0a0a0f';
   const COLOR_GRID_BG = '#13131f';
@@ -378,10 +378,6 @@
     draw();
   });
 
-  document.getElementById('btnExport').addEventListener('click', function () {
-    document.getElementById('exportModal').classList.add('open');
-  });
-
   document.getElementById('expCancel').addEventListener('click', function () {
     document.getElementById('exportModal').classList.remove('open');
   });
@@ -449,4 +445,8 @@
   }
 
   draw();
+  document.getElementById('btnExport').addEventListener('click', function () {
+    document.getElementById('expGap').value = String(BLOCK_MS);
+    document.getElementById('exportModal').classList.add('open');
+  });
 })();
