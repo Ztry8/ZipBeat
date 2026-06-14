@@ -29,6 +29,7 @@
   let hoverRow = -1;
   let isDraggingPlayhead = false;
   let audioCtx = null;
+  let loopEnabled = false;
 
   const totalW = COLS * COL_W;
   const totalH = ROWS * ROW_H;
@@ -172,10 +173,17 @@
 
     const hasMore = checkAnyBlockAfter(col);
     if (!hasMore && col > playStartCol + 5) {
-      stopPlayback();
-      playheadCol = 0;
-      draw();
-      return;
+      if (loopEnabled) {
+        playStartTime = performance.now();
+        playStartCol  = 0;
+        playheadCol   = 0;
+        lastPlayedCol = -1;
+      } else {
+        stopPlayback();
+        playheadCol = 0;
+        draw();
+        return;
+      }
     }
 
     if (col !== playheadCol) {
@@ -447,6 +455,10 @@
     rec.stop();
   }
 
+  document.getElementById('btnLoop').addEventListener('click', function () {
+    loopEnabled = !loopEnabled;
+    this.classList.toggle('active', loopEnabled);
+  });
   draw();
   document.getElementById('btnExport').addEventListener('click', function () {
     document.getElementById('expGap').value = String(BLOCK_MS);
