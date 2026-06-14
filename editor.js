@@ -30,6 +30,8 @@
   let isDraggingPlayhead = false;
   let audioCtx = null;
   let loopEnabled = false;
+  let isPainting = false;
+  let paintMode = null;
 
   const totalW = COLS * COL_W;
   const totalH = ROWS * ROW_H;
@@ -270,26 +272,41 @@
     return col === playheadCol;
   }
 
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   canvas.addEventListener('mousedown', function (e) {
-    if (e.button !== 0) return;
-    if (isOnPlayhead(e)) {
+    if (isDraggingPlayhead) return;
+    if (isOnPlayhead(e) && e.button === 0) {
       isDraggingPlayhead = true;
       return;
     }
     const { col, row } = canvasCoords(e);
     if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-    const key = cellKey(row, col);
-    if (cells[key]) {
-      delete cells[key];
-    } else {
-      cells[key] = {
-        type:   document.getElementById('selType').value,
-        freq:   parseFloat(document.getElementById('selNote').value) || 440,
-        note:   document.getElementById('selNote').selectedOptions[0].text,
-        vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
-      };
+
+    if (e.button === 2) {
+      delete cells[cellKey(row, col)];
+      isPainting = true;
+      paintMode = 'erase';
+      draw();
+      return;
     }
-    draw();
+
+    if (e.button === 0) {
+      const key = cellKey(row, col);
+      if (cells[key]) {
+        delete cells[key];
+        paintMode = 'erase';
+      } else {
+        cells[key] = {
+          type:   document.getElementById('selType').value,
+          freq:   parseFloat(document.getElementById('selNote').value) || 440,
+          note:   document.getElementById('selNote').selectedOptions[0].text,
+          vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
+        };
+        paintMode = 'draw';
+      }
+      isPainting = true;
+      draw();
+    }
   });
 
   canvas.addEventListener('mousemove', function (e) {
@@ -304,8 +321,24 @@
       draw();
       return;
     }
+
     const { col, row } = canvasCoords(e);
     hoverCol = col; hoverRow = row;
+
+    if (isPainting && col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+      const key = cellKey(row, col);
+      if (paintMode === 'erase') {
+        delete cells[key];
+      } else if (paintMode === 'draw' && !cells[key]) {
+        cells[key] = {
+          type:   document.getElementById('selType').value,
+          freq:   parseFloat(document.getElementById('selNote').value) || 440,
+          note:   document.getElementById('selNote').selectedOptions[0].text,
+          vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
+        };
+      }
+    }
+
     draw();
   });
 
@@ -317,6 +350,8 @@
 
   document.addEventListener('mouseup', function () {
     isDraggingPlayhead = false;
+    isPainting = false;
+    paintMode = null;
   });
 
   document.getElementById('btnPlay').addEventListener('click', function () {
