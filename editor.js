@@ -117,7 +117,7 @@
       ctx.font = `500 9px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const label = cell.type[0].toUpperCase() + ' ' + cell.freq;
+      const label = cell.type[0].toUpperCase() + ' ' + cell.note;
       ctx.fillText(label, c * COL_W + COL_W / 2, r * ROW_H + ROW_H / 2);
     }
 
@@ -276,7 +276,8 @@
     } else {
       cells[key] = {
         type:   document.getElementById('selType').value,
-        freq:   parseFloat(document.getElementById('inpFreq').value) || 440,
+        freq:   parseFloat(document.getElementById('selNote').value) || 440,
+        note:   document.getElementById('selNote').selectedOptions[0].text,
         detune: parseFloat(document.getElementById('inpDetune').value) || 0,
         vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
       };

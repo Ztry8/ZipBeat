@@ -341,9 +341,69 @@
         <option value="sawtooth">Sawtooth</option>
         <option value="triangle">Triangle</option>
       </select>
-      <span class="tb-label" style="margin-left:8px">Freq</span>
-      <input class="tb-input tb-input-sm" id="inpFreq" type="number" min="20" max="20000" value="440" aria-label="Frequency in Hz">
-      <span class="tb-label">Hz</span>
+      <span class="tb-label" style="margin-left:8px">Note</span>
+      <select class="tb-select" id="selNote" aria-label="Note">
+        <optgroup label="C">
+          <option value="130.81">C3</option>
+          <option value="261.63">C4</option>
+          <option value="523.25">C5</option>
+        </optgroup>
+        <optgroup label="D">
+          <option value="146.83">D3</option>
+          <option value="293.66">D4</option>
+          <option value="587.33">D5</option>
+        </optgroup>
+        <optgroup label="E">
+          <option value="164.81">E3</option>
+          <option value="329.63">E4</option>
+          <option value="659.25">E5</option>
+        </optgroup>
+        <optgroup label="F">
+          <option value="174.61">F3</option>
+          <option value="349.23">F4</option>
+          <option value="698.46">F5</option>
+        </optgroup>
+        <optgroup label="G">
+          <option value="196.00">G3</option>
+          <option value="392.00">G4</option>
+          <option value="783.99">G5</option>
+        </optgroup>
+        <optgroup label="A">
+          <option value="220.00">A3</option>
+          <option value="440.00" selected>A4</option>
+          <option value="880.00">A5</option>
+        </optgroup>
+        <optgroup label="B">
+          <option value="246.94">B3</option>
+          <option value="493.88">B4</option>
+          <option value="987.77">B5</option>
+        </optgroup>
+        <optgroup label="C# / Db">
+          <option value="138.59">C#3</option>
+          <option value="277.18">C#4</option>
+          <option value="554.37">C#5</option>
+        </optgroup>
+        <optgroup label="D# / Eb">
+          <option value="155.56">D#3</option>
+          <option value="311.13">D#4</option>
+          <option value="622.25">D#5</option>
+        </optgroup>
+        <optgroup label="F# / Gb">
+          <option value="185.00">F#3</option>
+          <option value="369.99">F#4</option>
+          <option value="739.99">F#5</option>
+        </optgroup>
+        <optgroup label="G# / Ab">
+          <option value="207.65">G#3</option>
+          <option value="415.30">G#4</option>
+          <option value="830.61">G#5</option>
+        </optgroup>
+        <optgroup label="A# / Bb">
+          <option value="233.08">A#3</option>
+          <option value="466.16">A#4</option>
+          <option value="932.33">A#5</option>
+        </optgroup>
+      </select>
       <span class="tb-label" style="margin-left:8px">Detune</span>
       <input class="tb-input tb-input-sm" id="inpDetune" type="number" min="-1200" max="1200" value="0" aria-label="Detune in cents">
       <span class="tb-label">c</span>
