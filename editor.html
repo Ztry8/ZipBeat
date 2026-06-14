@@ -52,14 +52,23 @@
 
     .topbar {
       display: flex;
-      align-items: center;
-      gap: 0;
-      height: 56px;
+      flex-direction: column;
       border-bottom: 1px solid var(--border);
       background: var(--surface);
       flex-shrink: 0;
+    }
+
+    .topbar-row {
+      display: flex;
+      align-items: center;
+      height: 48px;
       padding: 0 12px;
+      gap: 0;
       overflow-x: auto;
+    }
+
+    .topbar-row + .topbar-row {
+      border-top: 1px solid var(--border);
     }
 
     .topbar-logo {
@@ -70,6 +79,7 @@
       color: var(--text);
       padding: 0 12px;
       white-space: nowrap;
+      text-decoration: none;
     }
 
     .topbar-logo span { color: var(--accent); }
@@ -270,86 +280,88 @@
 
 <div class="topbar" role="toolbar" aria-label="Editor controls">
 
-  <a href="index.html" class="topbar-logo" aria-label="ZipBeat home">Zip<span>Beat</span></a>
-  <div class="topbar-sep" aria-hidden="true"></div>
+  <div class="topbar-row">
+    <a href="index.html" class="topbar-logo" aria-label="ZipBeat home">Zip<span>Beat</span></a>
+    <div class="topbar-sep" aria-hidden="true"></div>
 
-  <div class="tb-group" role="group" aria-label="Transport">
-    <button class="tb-btn tb-btn-play" id="btnPlay" title="Play (Space)">
-      <i id="playIcon" class="fa-solid fa-play"></i>
-      <span id="playLabel">Play</span>
-    </button>
-    <button class="tb-btn" id="btnStop" title="Stop">
-      <i class="fa-solid fa-stop"></i>
-      Stop
-    </button>
-    <button class="tb-btn" id="btnRewind" title="Return to start">
-      <i class="fa-solid fa-backward-step"></i>
-      Start
-    </button>
+    <div class="tb-group" role="group" aria-label="Transport">
+      <button class="tb-btn tb-btn-play" id="btnPlay" title="Play (Space)">
+        <i id="playIcon" class="fa-solid fa-play"></i>
+        <span id="playLabel">Play</span>
+      </button>
+      <button class="tb-btn" id="btnStop" title="Stop">
+        <i class="fa-solid fa-stop"></i>
+        Stop
+      </button>
+      <button class="tb-btn" id="btnRewind" title="Return to start">
+        <i class="fa-solid fa-backward-step"></i>
+        Start
+      </button>
+    </div>
+
+    <div class="topbar-sep" aria-hidden="true"></div>
+
+    <div class="tb-group" role="group" aria-label="Project">
+      <button class="tb-btn" id="btnSave">
+        <i class="fa-solid fa-floppy-disk"></i>
+        Save
+      </button>
+      <button class="tb-btn" id="btnLoad">
+        <i class="fa-solid fa-folder-open"></i>
+        Load
+      </button>
+      <input type="file" id="fileInput" accept=".json" style="display:none" aria-hidden="true">
+    </div>
+
+    <div class="topbar-sep" aria-hidden="true"></div>
+
+    <div class="tb-group" role="group" aria-label="Export">
+      <button class="tb-btn tb-btn-export" id="btnExport">
+        <i class="fa-solid fa-file-audio"></i>
+        Export Audio
+      </button>
+    </div>
+
+    <div class="topbar-sep" aria-hidden="true"></div>
+
+    <div class="tb-group">
+      <button class="tb-btn tb-btn-danger" id="btnClear">
+        <i class="fa-solid fa-trash"></i>
+        Clear
+      </button>
+    </div>
   </div>
 
-  <div class="topbar-sep" aria-hidden="true"></div>
+  <div class="topbar-row">
+    <div class="tb-group" role="group" aria-label="Sound settings">
+      <span class="tb-label">Type</span>
+      <select class="tb-select" id="selType" aria-label="Oscillator type">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+      </select>
+      <span class="tb-label" style="margin-left:8px">Freq</span>
+      <input class="tb-input tb-input-sm" id="inpFreq" type="number" min="20" max="20000" value="440" aria-label="Frequency in Hz">
+      <span class="tb-label">Hz</span>
+      <span class="tb-label" style="margin-left:8px">Detune</span>
+      <input class="tb-input tb-input-sm" id="inpDetune" type="number" min="-1200" max="1200" value="0" aria-label="Detune in cents">
+      <span class="tb-label">c</span>
+      <span class="tb-label" style="margin-left:8px">Vol</span>
+      <input class="tb-input tb-input-sm" id="inpVol" type="number" min="0" max="1" step="0.01" value="0.18" aria-label="Volume 0 to 1">
+    </div>
 
-  <div class="tb-group" role="group" aria-label="Sound settings">
-    <span class="tb-label">Type</span>
-    <select class="tb-select" id="selType" aria-label="Oscillator type">
-      <option value="sine">Sine</option>
-      <option value="square">Square</option>
-      <option value="sawtooth">Sawtooth</option>
-      <option value="triangle">Triangle</option>
-    </select>
-    <span class="tb-label">Freq</span>
-    <input class="tb-input tb-input-sm" id="inpFreq" type="number" min="20" max="20000" value="440" aria-label="Frequency in Hz">
-    <span class="tb-label">Hz</span>
-    <span class="tb-label" style="margin-left:8px">Detune</span>
-    <input class="tb-input tb-input-sm" id="inpDetune" type="number" min="-1200" max="1200" value="0" aria-label="Detune in cents">
-    <span class="tb-label">c</span>
-    <span class="tb-label" style="margin-left:8px">Vol</span>
-    <input class="tb-input tb-input-sm" id="inpVol" type="number" min="0" max="1" step="0.01" value="0.18" aria-label="Volume 0 to 1">
-  </div>
+    <div class="topbar-sep" aria-hidden="true"></div>
 
-  <div class="topbar-sep" aria-hidden="true"></div>
-
-  <div class="tb-group" role="group" aria-label="Tempo">
-    <span class="tb-label">Block</span>
-    <select class="tb-select" id="selBlockMs" aria-label="Block duration in ms">
-      <option value="50" selected>50 ms</option>
-      <option value="75">75 ms</option>
-      <option value="100">100 ms</option>
-      <option value="150">150 ms</option>
-    </select>
-  </div>
-
-  <div class="topbar-sep" aria-hidden="true"></div>
-
-  <div class="tb-group" role="group" aria-label="Project">
-    <button class="tb-btn" id="btnSave">
-      <i class="fa-solid fa-floppy-disk"></i>
-      Save
-    </button>
-    <button class="tb-btn" id="btnLoad">
-      <i class="fa-solid fa-folder-open"></i>
-      Load
-    </button>
-    <input type="file" id="fileInput" accept=".json" style="display:none" aria-hidden="true">
-  </div>
-
-  <div class="topbar-sep" aria-hidden="true"></div>
-
-  <div class="tb-group" role="group" aria-label="Export">
-    <button class="tb-btn tb-btn-export" id="btnExport">
-      <i class="fa-solid fa-file-audio"></i>
-      Export Audio
-    </button>
-  </div>
-
-  <div class="topbar-sep" aria-hidden="true"></div>
-
-  <div class="tb-group">
-    <button class="tb-btn tb-btn-danger" id="btnClear">
-      <i class="fa-solid fa-trash"></i>
-      Clear
-    </button>
+    <div class="tb-group" role="group" aria-label="Tempo">
+      <span class="tb-label">Block</span>
+      <select class="tb-select" id="selBlockMs" aria-label="Block duration in ms">
+        <option value="50" selected>50 ms</option>
+        <option value="75">75 ms</option>
+        <option value="100">100 ms</option>
+        <option value="150">150 ms</option>
+      </select>
+    </div>
   </div>
 
 </div>
