@@ -58,7 +58,8 @@
       osc.type      = cell.type;
       osc.frequency.value = cell.freq;
       osc.detune.value    = cell.detune;
-      gain.gain.setValueAtTime(0.18, ac.currentTime);
+      const vol = (cell.vol !== undefined) ? cell.vol : 0.18;
+      gain.gain.setValueAtTime(vol, ac.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + BLOCK_MS / 1000);
       osc.connect(gain);
       gain.connect(ac.destination);
@@ -276,7 +277,8 @@
       cells[key] = {
         type:   document.getElementById('selType').value,
         freq:   parseFloat(document.getElementById('inpFreq').value) || 440,
-        detune: parseFloat(document.getElementById('inpDetune').value) || 0
+        detune: parseFloat(document.getElementById('inpDetune').value) || 0,
+        vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
       };
     }
     draw();
@@ -430,7 +432,8 @@
         osc.frequency.value = cell.freq;
         osc.detune.value    = cell.detune;
         const t0 = ac.currentTime + (c * blockMs) / 1000;
-        gain.gain.setValueAtTime(0.18, t0);
+        const vol = (cell.vol !== undefined) ? cell.vol : 0.18;
+        gain.gain.setValueAtTime(vol, t0);
         gain.gain.exponentialRampToValueAtTime(0.0001, t0 + blockMs / 1000);
         osc.connect(gain);
         gain.connect(dest);
