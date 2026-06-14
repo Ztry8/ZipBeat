@@ -57,7 +57,7 @@
       const gain = ac.createGain();
       osc.type      = cell.type;
       osc.frequency.value = cell.freq;
-      osc.detune.value    = cell.detune;
+      osc.detune.value = cell.detune ?? 0;
       const vol = (cell.vol !== undefined) ? cell.vol : 0.18;
       gain.gain.setValueAtTime(vol, ac.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + BLOCK_MS / 1000);
@@ -278,7 +278,6 @@
         type:   document.getElementById('selType').value,
         freq:   parseFloat(document.getElementById('selNote').value) || 440,
         note:   document.getElementById('selNote').selectedOptions[0].text,
-        detune: parseFloat(document.getElementById('inpDetune').value) || 0,
         vol:    Math.max(0, Math.min(1, parseFloat(document.getElementById('inpVol').value) || 0.18))
       };
     }
@@ -431,7 +430,7 @@
         const gain = ac.createGain();
         osc.type = cell.type;
         osc.frequency.value = cell.freq;
-        osc.detune.value    = cell.detune;
+        osc.detune.value = cell.detune ?? 0;
         const t0 = ac.currentTime + (c * blockMs) / 1000;
         const vol = (cell.vol !== undefined) ? cell.vol : 0.18;
         gain.gain.setValueAtTime(vol, t0);
