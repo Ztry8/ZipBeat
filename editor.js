@@ -32,6 +32,10 @@
   let loopEnabled = false;
   let isPainting = false;
   let paintMode = null;
+  let undoStack = [];
+  let redoStack = [];
+  const MAX_HISTORY = 100;
+  let strokeSnapshot = null;
 
   const totalW = COLS * COL_W;
   const totalH = ROWS * ROW_H;
@@ -42,6 +46,42 @@
   canvas.style.height = totalH + 'px';
 
   function cellKey(r, c) { return r + ',' + c; }
+
+  function snapshot() {
+    return JSON.stringify(cells);
+  }
+
+  function updateUndoRedoButtons() {
+    const btnUndo = document.getElementById('btnUndo');
+    const btnRedo = document.getElementById('btnRedo');
+    if (btnUndo) btnUndo.disabled = undoStack.length === 0;
+    if (btnRedo) btnRedo.disabled = redoStack.length === 0;
+  }
+
+  function pushHistory() {
+    undoStack.push(snapshot());
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    redoStack = [];
+    updateUndoRedoButtons();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) return;
+    redoStack.push(snapshot());
+    if (redoStack.length > MAX_HISTORY) redoStack.shift();
+    cells = JSON.parse(undoStack.pop());
+    updateUndoRedoButtons();
+    draw();
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    undoStack.push(snapshot());
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    cells = JSON.parse(redoStack.pop());
+    updateUndoRedoButtons();
+    draw();
+  }
 
   function getAudioCtx() {
     if (!audioCtx || audioCtx.state === 'closed') {
@@ -283,6 +323,7 @@
     if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
 
     if (e.button === 2) {
+      strokeSnapshot = snapshot();
       delete cells[cellKey(row, col)];
       isPainting = true;
       paintMode = 'erase';
@@ -291,6 +332,7 @@
     }
 
     if (e.button === 0) {
+      strokeSnapshot = snapshot();
       const key = cellKey(row, col);
       if (cells[key]) {
         delete cells[key];
@@ -350,6 +392,15 @@
 
   document.addEventListener('mouseup', function () {
     isDraggingPlayhead = false;
+    if (isPainting && strokeSnapshot !== null) {
+      if (strokeSnapshot !== snapshot()) {
+        undoStack.push(strokeSnapshot);
+        if (undoStack.length > MAX_HISTORY) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoButtons();
+      }
+      strokeSnapshot = null;
+    }
     isPainting = false;
     paintMode = null;
   });
@@ -371,16 +422,29 @@
     draw();
   });
 
+  document.getElementById('btnUndo').addEventListener('click', undo);
+  document.getElementById('btnRedo').addEventListener('click', redo);
+
   document.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
     if (e.code === 'Space') {
       e.preventDefault();
       if (isPlaying) pausePlayback(); else startPlayback();
+      return;
+    }
+
+    const isCtrl = e.ctrlKey || e.metaKey;
+    if (isCtrl && e.code === 'KeyZ' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    } else if (isCtrl && (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey))) {
+      e.preventDefault();
+      redo();
     }
   });
 
   document.getElementById('btnSave').addEventListener('click', function () {
-    const data = { version: 1, cells };
+    const data = { version: 1, cells, blockMs: BLOCK_MS };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -402,7 +466,13 @@
       try {
         const data = JSON.parse(ev.target.result);
         if (data && data.cells) {
+          pushHistory();
           cells = data.cells;
+          if (data.blockMs) {
+            BLOCK_MS = data.blockMs;
+            const sel = document.getElementById('selBlockMs');
+            if (sel) sel.value = String(BLOCK_MS);
+          }
           stopPlayback();
           playheadCol = 0;
           draw();
@@ -417,6 +487,7 @@
 
   document.getElementById('btnClear').addEventListener('click', function () {
     if (!confirm('Clear all blocks?')) return;
+    pushHistory();
     cells = {};
     stopPlayback();
     playheadCol = 0;
@@ -503,6 +574,7 @@
     loopEnabled = !loopEnabled;
     this.classList.toggle('active', loopEnabled);
   });
+  updateUndoRedoButtons();
   draw();
   document.getElementById('btnExport').addEventListener('click', function () {
     document.getElementById('expGap').value = String(BLOCK_MS);

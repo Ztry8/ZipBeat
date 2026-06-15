@@ -156,6 +156,15 @@
     .tb-btn-export { color: var(--accent); border-color: rgba(124,58,237,0.4); }
     .tb-btn-export:hover { background: rgba(124,58,237,0.12); }
 
+    .tb-btn:disabled,
+    .tb-btn:disabled:hover {
+      opacity: 0.35;
+      cursor: not-allowed;
+      color: var(--muted-light);
+      border-color: var(--border);
+      background: var(--card);
+    }
+
     .editor-body {
       display: flex;
       flex: 1;
@@ -300,6 +309,19 @@
       <button class="tb-btn" id="btnLoop" title="Toggle loop">
         <i class="fa-solid fa-repeat"></i>
         Loop
+      </button>
+    </div>
+
+    <div class="topbar-sep" aria-hidden="true"></div>
+
+    <div class="tb-group" role="group" aria-label="History">
+      <button class="tb-btn" id="btnUndo" title="Undo (Ctrl+Z)">
+        <i class="fa-solid fa-rotate-left"></i>
+        Undo
+      </button>
+      <button class="tb-btn" id="btnRedo" title="Redo (Ctrl+Y)">
+        <i class="fa-solid fa-rotate-right"></i>
+        Redo
       </button>
     </div>
 
