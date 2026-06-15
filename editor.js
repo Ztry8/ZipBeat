@@ -490,6 +490,15 @@
     rec.stop();
   }
 
+  document.getElementById('selBlockMs').addEventListener('change', function () {
+    BLOCK_MS = parseInt(this.value, 10) || 50;
+
+    if (isPlaying) {
+      playStartTime = performance.now();
+      playStartCol  = playheadCol;
+      lastPlayedCol = -1;
+    }
+  });
   document.getElementById('btnLoop').addEventListener('click', function () {
     loopEnabled = !loopEnabled;
     this.classList.toggle('active', loopEnabled);
